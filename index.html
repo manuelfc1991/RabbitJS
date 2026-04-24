@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RabbitJS v1.0.0 — Documentation</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,800;1,9..144,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f0e;
+    --bg2: #131614;
+    --bg3: #181c1a;
+    --border: #232825;
+    --accent: #7fff6e;
+    --accent2: #3de8c9;
+    --accent3: #f7c948;
+    --accent4: #ff6b6b;
+    --text: #e8ede9;
+    --text-muted: #7a8c7e;
+    --text-dim: #4a5c4e;
+    --code-bg: #0a0d0b;
+    --tag-core: #1a2e1c;
+    --tag-core-text: #7fff6e;
+    --tag-nova: #1a2535;
+    --tag-nova-text: #3de8c9;
+    --tag-jq: #2e2516;
+    --tag-jq-text: #f7c948;
+    --sidebar-w: 280px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    z-index: 100;
+  }
+
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-track { background: transparent; }
+  #sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .sidebar-header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg2);
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sidebar-logo .rabbit-icon { font-size: 20px; }
+
+  .sidebar-version {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .sidebar-search {
+    margin-top: 14px;
+  }
+
+  .sidebar-search input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .sidebar-search input:focus { border-color: var(--accent); }
+  .sidebar-search input::placeholder { color: var(--text-dim); }
+
+  .sidebar-nav { padding: 12px 0 32px; }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 16px 24px 6px;
+  }
+
+  .nav-item {
+    display: block;
+    padding: 5px 24px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+    border-left: 2px solid transparent;
+    cursor: pointer;
+  }
+
+  .nav-item:hover { color: var(--text); background: var(--bg3); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(127,255,110,0.04); }
+
+  .nav-item .badge {
+    float: right;
+    font-size: 9px;
+    font-family: 'DM Mono', monospace;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-nova { background: var(--tag-nova); color: var(--tag-nova-text); }
+  .badge-jq   { background: var(--tag-jq);   color: var(--tag-jq-text);   }
+
+  /* ── Main ── */
+  #main {
+    flex: 1;
+    min-width: 0;
+    max-width: 900px;
+    padding: 48px 56px 80px;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    margin-bottom: 56px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--text);
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span { color: var(--accent); }
+
+  .hero-desc {
+    font-size: 17px;
+    color: var(--text-muted);
+    max-width: 560px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .hero-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .hero-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .hero-badge.green  { border-color: var(--accent);  color: var(--accent);  background: rgba(127,255,110,0.06); }
+  .hero-badge.teal   { border-color: var(--accent2); color: var(--accent2); background: rgba(61,232,201,0.06); }
+  .hero-badge.yellow { border-color: var(--accent3); color: var(--accent3); background: rgba(247,201,72,0.06); }
+
+  /* ── Install block ── */
+  .install-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .install-block-label {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .install-block code {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    display: block;
+    line-height: 2;
+  }
+
+  .install-block code .comment { color: var(--text-dim); }
+  .install-block code .keyword { color: var(--accent2); }
+  .install-block code .string  { color: var(--accent3); }
+
+  /* ── Section ── */
+  .section {
+    margin-bottom: 52px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-header h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-core { background: var(--tag-core); color: var(--tag-core-text); }
+  .tag-nova  { background: var(--tag-nova); color: var(--tag-nova-text); }
+  .tag-jq    { background: var(--tag-jq);   color: var(--tag-jq-text);  }
+
+  /* ── Method entries ── */
+  .method {
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .method:hover { border-color: #2e3a30; }
+  .method.highlight { border-color: var(--accent); }
+
+  .method-header {
+    background: var(--bg3);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    cursor: pointer;
+  }
+
+  .method-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .method-sig {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .method-tags {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+  }
+
+  .method-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+  }
+
+  .method-body {
+    padding: 16px 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .method-desc {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+
+  .method-desc strong { color: var(--text); font-weight: 500; }
+
+  /* ── Params table ── */
+  .params-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+
+  .params-table th {
+    text-align: left;
+    padding: 6px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .params-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(35,40,37,0.5);
+    vertical-align: top;
+  }
+
+  .params-table tr:last-child td { border-bottom: none; }
+
+  .param-name { font-family: 'DM Mono', monospace; color: var(--accent2); font-size: 13px; }
+  .param-type { font-family: 'DM Mono', monospace; color: var(--accent3); font-size: 12px; }
+  .param-opt  { color: var(--text-dim); font-size: 12px; }
+  .param-desc { color: var(--text-muted); }
+
+  /* ── Code blocks ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    overflow-x: auto;
+    margin-top: 8px;
+  }
+
+  .code-block .c  { color: var(--text-dim); font-style: italic; }
+  .code-block .k  { color: var(--accent2); }
+  .code-block .s  { color: var(--accent3); }
+  .code-block .f  { color: var(--accent); }
+  .code-block .v  { color: #c9a7ff; }
+  .code-block .n  { color: var(--text-muted); }
+  .code-block .p  { color: var(--text-dim); }
+
+  /* ── Returns note ── */
+  .returns {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .returns-type { color: var(--accent2); }
+
+  /* ── Alert boxes ── */
+  .alert {
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .alert-nova {
+    background: rgba(61,232,201,0.06);
+    border: 1px solid rgba(61,232,201,0.2);
+    color: var(--accent2);
+  }
+
+  .alert-jq {
+    background: rgba(247,201,72,0.06);
+    border: 1px solid rgba(247,201,72,0.2);
+    color: var(--accent3);
+  }
+
+  .alert-tip {
+    background: rgba(127,255,110,0.06);
+    border: 1px solid rgba(127,255,110,0.2);
+    color: var(--accent);
+  }
+
+  /* ── Method group shortcuts (collapsed list) ── */
+  .shorthand-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .shorthand-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 10px;
+  }
+
+  /* ── Divider ── */
+  hr.section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 44px 0;
+  }
+
+  /* ── Inline code ── */
+  code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  /* ── TOC sub-items ── */
+  .nav-item.sub {
+    padding-left: 36px;
+    font-size: 12px;
+  }
+
+  /* ── Scrollspy active ── */
+  .section { scroll-margin-top: 20px; }
+
+  /* ── Footer ── */
+  .doc-footer {
+    margin-top: 60px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+  }
+
+  @media (max-width: 768px) {
+    #sidebar { display: none; }
+    #main { padding: 28px 20px 60px; }
+    .hero h1 { font-size: 34px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ SIDEBAR ═══ -->
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo"><span class="rabbit-icon">🐇</span> RabbitJS</div>
+    <div class="sidebar-version">v1.0.0 — jQuery 3.7.1 Compatible</div>
+    <div class="sidebar-search">
+      <input type="text" id="searchInput" placeholder="Search methods…" autocomplete="off">
+    </div>
+  </div>
+  <div class="sidebar-nav" id="sidebarNav">
+    <div class="nav-section-label">Getting Started</div>
+    <a class="nav-item" href="#installation">Installation</a>
+    <a class="nav-item" href="#quick-start">Quick Start</a>
+    <a class="nav-item" href="#jquery-compat">jQuery Compatibility</a>
+
+    <div class="nav-section-label">Core API</div>
+    <a class="nav-item" href="#selection">Selection &amp; Init</a>
+    <a class="nav-item" href="#traversal">Traversal</a>
+    <a class="nav-item" href="#dom">DOM Manipulation</a>
+    <a class="nav-item" href="#attributes">Attributes &amp; Data</a>
+    <a class="nav-item" href="#classes">Classes</a>
+    <a class="nav-item" href="#css">CSS &amp; Styles</a>
+    <a class="nav-item" href="#dimensions">Dimensions</a>
+    <a class="nav-item" href="#events">Events</a>
+    <a class="nav-item" href="#animation">Animation</a>
+    <a class="nav-item" href="#forms">Forms</a>
+    <a class="nav-item" href="#ajax">AJAX</a>
+    <a class="nav-item" href="#deferred">Deferred &amp; Promises</a>
+
+    <div class="nav-section-label">RabbitJS Extras</div>
+    <a class="nav-item" href="#reactive"><span class="badge badge-nova">NOVA</span>Reactive Binding</a>
+    <a class="nav-item" href="#observers"><span class="badge badge-nova">NOVA</span>Observers</a>
+    <a class="nav-item" href="#timeline"><span class="badge badge-nova">NOVA</span>Animation Timeline</a>
+    <a class="nav-item" href="#dragdrop"><span class="badge badge-nova">NOVA</span>Drag &amp; Drop</a>
+    <a class="nav-item" href="#template"><span class="badge badge-nova">NOVA</span>Template Engine</a>
+    <a class="nav-item" href="#eventbus"><span class="badge badge-nova">NOVA</span>Event Bus</a>
+    <a class="nav-item" href="#http"><span class="badge badge-nova">NOVA</span>HTTP Client</a>
+    <a class="nav-item" href="#storage">Storage &amp; Cookies</a>
+    <a class="nav-item" href="#utilities">Utilities</a>
+
+    <div class="nav-section-label">jQuery Layer</div>
+    <a class="nav-item" href="#jq-events"><span class="badge badge-jq">JQ</span>Legacy Events</a>
+    <a class="nav-item" href="#jq-callbacks"><span class="badge badge-jq">JQ</span>Callbacks</a>
+    <a class="nav-item" href="#jq-queue"><span class="badge badge-jq">JQ</span>Queue System</a>
+    <a class="nav-item" href="#jq-hooks"><span class="badge badge-jq">JQ</span>Hooks &amp; FX</a>
+    <a class="nav-item" href="#plugins">Writing Plugins</a>
+  </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main id="main">
+
+  <!-- HERO -->
+  <div class="hero" id="top">
+    <div class="hero-eyebrow">Documentation</div>
+    <h1>Rabbit<span>JS</span></h1>
+    <p class="hero-desc">A modern DOM manipulation library that surpasses jQuery — with reactive data binding, built-in observers, a template engine, animation timeline, and full jQuery plugin compatibility.</p>
+    <div class="hero-badges">
+      <span class="hero-badge green">v1.0.0</span>
+      <span class="hero-badge teal">jQuery 3.7.1 Compatible</span>
+      <span class="hero-badge yellow">Zero Dependencies</span>
+      <span class="hero-badge">MIT License</span>
+      <span class="hero-badge">ES2020+</span>
+    </div>
+  </div>
+
+  <!-- INSTALLATION -->
+  <div class="section" id="installation">
+    <div class="section-header">
+      <h2>Installation</h2>
+    </div>
+    <div class="install-block">
+      <div class="install-block-label">Script Tag</div>
+      <code>
+        <span class="comment">&lt;!-- Drop-in. Exposes window.RabbitJS, window.jQuery, and window.$ --&gt;</span><br>
+        &lt;<span class="keyword">script</span> <span class="keyword">src</span>=<span class="string">"rabbit.js"</span>&gt;&lt;/<span class="keyword">script</span>&gt;
+      </code>
+    </div>
+    <div class="install-block">
+      <div class="install-block-label">CommonJS / Node</div>
+      <code>
+        <span class="keyword">const</span> $ = <span class="keyword">require</span>(<span class="string">'./rabbit.js'</span>);
+      </code>
+    </div>
+    <div class="install-block">
+      <div class="install-block-label">AMD / RequireJS</div>
+      <code>
+        <span class="keyword">define</span>([<span class="string">'rabbit'</span>], <span class="keyword">function</span>($) { <span class="comment">/* ... */</span> });
+      </code>
+    </div>
+    <p style="color:var(--text-muted);font-size:14px;margin-top:16px;">After loading, <code>window.$</code>, <code>window.jQuery</code>, and <code>window.RabbitJS</code> all point to the same function. Existing jQuery plugins will work without modification.</p>
+  </div>
+
+  <!-- QUICK START -->
+  <div class="section" id="quick-start">
+    <div class="section-header">
+      <h2>Quick Start</h2>
+    </div>
+    <div class="code-block">
+<span class="c">// Standard jQuery syntax — works unchanged</span>
+$(<span class="k">function</span>() {
+  $(<span class="s">'.btn'</span>).<span class="f">on</span>(<span class="s">'click'</span>, <span class="k">function</span>() {
+    $(<span class="k">this</span>).<span class="f">toggleClass</span>(<span class="s">'active'</span>).<span class="f">text</span>(<span class="s">'Clicked!'</span>);
+  });
+
+  $.<span class="f">getJSON</span>(<span class="s">'/api/data'</span>).<span class="f">then</span>(<span class="k">data</span> => {
+    $(<span class="s">'#output'</span>).<span class="f">html</span>(<span class="s">`&lt;p&gt;${data.message}&lt;/p&gt;`</span>);
+  });
+});
+
+<span class="c">// RabbitJS-exclusive reactive binding</span>
+$(<span class="s">'#counter'</span>).<span class="f">bind</span>(<span class="s">'count'</span>, <span class="k">function</span>(val, $el) {
+  $el.<span class="f">text</span>(<span class="s">`Count: ${val}`</span>);
+}).<span class="f">setReactive</span>(<span class="s">'count'</span>, <span class="v">0</span>);
+    </div>
+  </div>
+
+  <!-- JQUERY COMPAT -->
+  <div class="section" id="jquery-compat">
+    <div class="section-header">
+      <h2>jQuery Compatibility</h2>
+      <span class="section-tag tag-jq">JQ</span>
+    </div>
+    <div class="alert alert-jq">
+      RabbitJS exposes <code>window.jQuery</code> and <code>window.$</code> and reports <code>$.fn.jquery = "3.7.1"</code>. Any jQuery plugin that checks the version string, uses <code>$.fn.extend()</code>, <code>$.Callbacks</code>, <code>$.Deferred</code>, <code>$.event</code>, <code>$.cssHooks</code>, or <code>$.fx</code> will work without modification.
+    </div>
+    <div class="code-block">
+<span class="c">// jQuery plugins register normally</span>
+$.<span class="f">fn</span>.<span class="f">myPlugin</span> = <span class="k">function</span>(options) {
+  <span class="k">return this</span>.<span class="f">each</span>(<span class="k">function</span>() {
+    $(<span class="k">this</span>).<span class="f">css</span>(<span class="s">'color'</span>, options.color || <span class="s">'red'</span>);
+  });
+};
+
+<span class="c">// Use it immediately</span>
+$(<span class="s">'.text'</span>).<span class="f">myPlugin</span>({ color: <span class="s">'blue'</span> });
+
+<span class="c">// noConflict works too</span>
+<span class="k">const</span> <span class="v">R</span> = $.<span class="f">noConflict</span>(<span class="k">true</span>); <span class="c">// restores both $ and jQuery globals</span>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- SELECTION -->
+  <div class="section" id="selection">
+    <div class="section-header">
+      <h2>Selection &amp; Initialization</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+    <p class="method-desc" style="margin-bottom:20px;">The main <code>$()</code> / <code>RabbitJS()</code> function accepts CSS selectors, HTML strings, DOM elements, NodeLists, arrays, or a ready callback.</p>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">$(selector)</span>
+        <span class="method-sig">$(selector [, context])</span>
+        <div class="method-tags"><span class="method-tag tag-core">CORE</span></div>
+      </div>
+      <div class="method-body">
+        <p class="method-desc">Creates a RabbitCollection. Accepts a CSS selector string, HTML string, DOM element, NodeList, array of elements, or a ready callback function.</p>
+        <div class="code-block">
+$(<span class="s">'.items'</span>)           <span class="c">// CSS selector</span>
+$(<span class="s">'&lt;div class="box"&gt;'</span>) <span class="c">// HTML creation</span>
+$(document)            <span class="c">// document/window wrapping</span>
+$([el1, el2])          <span class="c">// array of elements</span>
+$(<span class="s">'li'</span>, <span class="s">'#list'</span>)       <span class="c">// scoped to context</span>
+$(<span class="k">function</span>() { ... })  <span class="c">// DOM ready callback</span>
+        </div>
+        <div class="returns">→ returns <span class="returns-type">RabbitCollection</span></div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.ready(fn)</span>
+        <div class="method-tags"><span class="method-tag tag-core">CORE</span></div>
+      </div>
+      <div class="method-body">
+        <p class="method-desc">Executes <code>fn</code> when the DOM is ready. If already ready, fires immediately.</p>
+        <div class="code-block">$(document).<span class="f">ready</span>(<span class="k">function</span>() { <span class="c">/* DOM ready */</span> });</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAVERSAL -->
+  <div class="section" id="traversal">
+    <div class="section-header">
+      <h2>Traversal</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.find(selector)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Finds all descendants matching <code>selector</code> within the collection.</p>
+        <div class="code-block">$(<span class="s">'#nav'</span>).<span class="f">find</span>(<span class="s">'a.active'</span>)</div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.closest(selector)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Travels up the DOM, returning the nearest ancestor matching <code>selector</code> (including the element itself).</p>
+        <div class="code-block">$(<span class="s">'.btn'</span>).<span class="f">closest</span>(<span class="s">'.card'</span>)</div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.parent([selector])</span> / <span class="method-name">.parents([selector])</span></div>
+      <div class="method-body">
+        <p class="method-desc"><code>.parent()</code> returns immediate parents. <code>.parents()</code> returns all ancestors up to <code>&lt;html&gt;</code>. Optionally filtered by <code>selector</code>.</p>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.children([selector])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Returns direct children, optionally filtered.</p>
+        <div class="code-block">$(<span class="s">'ul'</span>).<span class="f">children</span>(<span class="s">'li.active'</span>)</div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.siblings([selector])</span></div>
+      <div class="method-body"><p class="method-desc">Returns all siblings of each element, excluding the element itself.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.next([sel])</span> / <span class="method-name">.prev([sel])</span> / <span class="method-name">.nextAll([sel])</span> / <span class="method-name">.prevAll([sel])</span></div>
+      <div class="method-body"><p class="method-desc">Navigate siblings. <code>next/prev</code> get the adjacent sibling; <code>nextAll/prevAll</code> get all following/preceding siblings.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.filter(selector|fn)</span> / <span class="method-name">.not(selector|fn)</span></div>
+      <div class="method-body"><p class="method-desc">Reduce the set to matching elements. <code>.not()</code> is the inverse.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.is(selector)</span></div>
+      <div class="method-body"><p class="method-desc">Returns <code>true</code> if any element in the collection matches. Also accepts a function or DOM element.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.has(selector)</span></div>
+      <div class="method-body"><p class="method-desc">Filters to elements that contain a descendant matching <code>selector</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.eq(n)</span> / <span class="method-name">.first()</span> / <span class="method-name">.last()</span></div>
+      <div class="method-body"><p class="method-desc">Returns the element at index <code>n</code> (negative counts from end), or the first/last element, as a new collection.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.get([n])</span> / <span class="method-name">.toArray()</span></div>
+      <div class="method-body"><p class="method-desc"><code>.get(n)</code> returns the raw DOM element at index. <code>.get()</code> / <code>.toArray()</code> return a plain array of all elements.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.index([target])</span></div>
+      <div class="method-body"><p class="method-desc">With no argument, returns the index of the first element among its siblings. With a target, returns the position of that target in the collection.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.each(fn)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Iterates over each element. <code>fn</code> is called with <code>(index, element)</code> and <code>this</code> bound to the element.</p>
+        <div class="code-block">$(<span class="s">'li'</span>).<span class="f">each</span>(<span class="k">function</span>(i, el) { $(el).<span class="f">text</span>(<span class="s">`Item ${i}`</span>); });</div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.map(fn)</span></div>
+      <div class="method-body"><p class="method-desc">Creates a new collection from the return values of <code>fn(index, element)</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.add(selector)</span> / <span class="method-name">.contents()</span> / <span class="method-name">.slice(start[,end])</span> / <span class="method-name">.end()</span></div>
+      <div class="method-body"><p class="method-desc"><code>.add()</code> merges another selection. <code>.contents()</code> gets child elements. <code>.slice()</code> returns a subset. <code>.end()</code> unwinds a pushed stack.</p></div>
+    </div>
+  </div>
+
+  <!-- DOM MANIPULATION -->
+  <div class="section" id="dom">
+    <div class="section-header">
+      <h2>DOM Manipulation</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.html([value])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Get or set innerHTML. Setter accepts a string or <code>fn(index, currentHTML)</code>.</p>
+        <div class="code-block">
+$(<span class="s">'#box'</span>).<span class="f">html</span>() <span class="c">// get</span>
+$(<span class="s">'#box'</span>).<span class="f">html</span>(<span class="s">'&lt;b&gt;New content&lt;/b&gt;'</span>) <span class="c">// set</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.text([value])</span></div>
+      <div class="method-body"><p class="method-desc">Get combined text content of all matched elements, or set textContent (XSS-safe). Accepts string or function.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.val([value])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Get or set form element values. Handles checkboxes (<code>true/false</code>), radios, and multi-select (returns array).</p>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.append(...content)</span> / <span class="method-name">.prepend(...content)</span></div>
+      <div class="method-body"><p class="method-desc">Insert content at the end or beginning of each element. Content can be HTML string, element, or RabbitCollection.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.appendTo(target)</span> / <span class="method-name">.prependTo(target)</span></div>
+      <div class="method-body"><p class="method-desc">Append/prepend the collection into the <code>target</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.after(...content)</span> / <span class="method-name">.before(...content)</span></div>
+      <div class="method-body"><p class="method-desc">Insert content after or before each matched element (as siblings, not children).</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.insertAfter(target)</span> / <span class="method-name">.insertBefore(target)</span></div>
+      <div class="method-body"><p class="method-desc">Insert the collection after or before the <code>target</code> element.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.wrap(wrapper)</span> / <span class="method-name">.wrapAll(wrapper)</span> / <span class="method-name">.wrapInner(wrapper)</span> / <span class="method-name">.unwrap([selector])</span></div>
+      <div class="method-body">
+        <p class="method-desc"><code>.wrap()</code> surrounds each element. <code>.wrapAll()</code> wraps all elements together in one wrapper. <code>.wrapInner()</code> wraps each element's children. <code>.unwrap()</code> removes the parent wrapper.</p>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.remove([selector])</span> / <span class="method-name">.detach([selector])</span> / <span class="method-name">.empty()</span></div>
+      <div class="method-body"><p class="method-desc"><code>.remove()</code> deletes elements from DOM. <code>.detach()</code> removes but keeps the collection reference. <code>.empty()</code> clears innerHTML.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.clone([withEvents])</span></div>
+      <div class="method-body"><p class="method-desc">Deep-clones elements. Pass <code>true</code> to also copy event listeners.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.replaceWith(content)</span> / <span class="method-name">.replaceAll(target)</span></div>
+      <div class="method-body"><p class="method-desc">Replace matched elements with new content, or replace <code>target</code> with the collection.</p></div>
+    </div>
+  </div>
+
+  <!-- ATTRIBUTES -->
+  <div class="section" id="attributes">
+    <div class="section-header">
+      <h2>Attributes &amp; Data</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.attr(name [, value])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Get or set HTML attributes. Pass an object to set multiple. Pass <code>null</code> as value to remove.</p>
+        <div class="code-block">
+$(<span class="s">'img'</span>).<span class="f">attr</span>(<span class="s">'src'</span>)                    <span class="c">// get</span>
+$(<span class="s">'a'</span>).<span class="f">attr</span>(<span class="s">'href'</span>, <span class="s">'/new'</span>)             <span class="c">// set</span>
+$(<span class="s">'input'</span>).<span class="f">attr</span>({ type: <span class="s">'text'</span>, name: <span class="s">'q'</span> }) <span class="c">// set multiple</span>
+$(<span class="s">'div'</span>).<span class="f">attr</span>(<span class="s">'id'</span>, <span class="k">null</span>)               <span class="c">// remove</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.removeAttr(names)</span></div>
+      <div class="method-body"><p class="method-desc">Removes one or more attributes (space-separated names supported).</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.prop(name [, value])</span> / <span class="method-name">.removeProp(name)</span></div>
+      <div class="method-body"><p class="method-desc">Get or set DOM properties (e.g. <code>checked</code>, <code>disabled</code>, <code>value</code>). Unlike <code>.attr()</code>, this accesses the live property.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.data([key [, value]])</span> / <span class="method-name">.removeData([key])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Store arbitrary data against elements using a <strong>WeakMap</strong> (no DOM pollution). Automatically reads <code>data-*</code> attributes as fallback. Pass no args to get all data.</p>
+        <div class="code-block">
+$(<span class="s">'#el'</span>).<span class="f">data</span>(<span class="s">'user'</span>, { id: <span class="v">1</span>, name: <span class="s">'Alice'</span> });
+$(<span class="s">'#el'</span>).<span class="f">data</span>(<span class="s">'user'</span>); <span class="c">// { id: 1, name: 'Alice' }</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLASSES -->
+  <div class="section" id="classes">
+    <div class="section-header">
+      <h2>Classes</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.addClass(names)</span> / <span class="method-name">.removeClass([names])</span> / <span class="method-name">.toggleClass(names [, state])</span> / <span class="method-name">.hasClass(name)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Manage CSS classes. All methods accept a function callback <code>fn(index, currentClass)</code>. <code>.toggleClass(name, true/false)</code> forces add or remove. <code>.removeClass()</code> with no arg clears all classes. <code>.hasClass()</code> returns boolean.</p>
+        <div class="code-block">
+$(<span class="s">'.card'</span>).<span class="f">addClass</span>(<span class="s">'active highlight'</span>);
+$(<span class="s">'.card'</span>).<span class="f">toggleClass</span>(<span class="s">'visible'</span>, isLoggedIn);
+$(<span class="s">'.card'</span>).<span class="f">hasClass</span>(<span class="s">'active'</span>); <span class="c">// true/false</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSS -->
+  <div class="section" id="css">
+    <div class="section-header">
+      <h2>CSS &amp; Styles</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.css(prop [, value])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Get computed style or set inline style. Supports CSS custom properties (<code>--var</code>). Pass an object to set multiple properties. Accepts a function callback.</p>
+        <div class="code-block">
+$(<span class="s">'#box'</span>).<span class="f">css</span>(<span class="s">'color'</span>)                      <span class="c">// get computed</span>
+$(<span class="s">'#box'</span>).<span class="f">css</span>(<span class="s">'color'</span>, <span class="s">'red'</span>)               <span class="c">// set</span>
+$(<span class="s">'#box'</span>).<span class="f">css</span>({ color: <span class="s">'red'</span>, fontSize: <span class="s">'16px'</span> }) <span class="c">// set multiple</span>
+$(<span class="s">'#box'</span>).<span class="f">css</span>(<span class="s">'--accent-color'</span>, <span class="s">'#ff0'</span>)      <span class="c">// CSS variable</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.cssVar(name [, value])</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body"><p class="method-desc">Get or set a CSS custom property (<code>--variable</code>) on the element. Falls back to <code>document.documentElement</code> for reads.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.rootVar(name [, value])</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body"><p class="method-desc">Read or write a CSS custom property on <code>:root</code> (<code>document.documentElement</code>), affecting the entire page.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.show([display])</span> / <span class="method-name">.hide()</span> / <span class="method-name">.toggle([show])</span></div>
+      <div class="method-body"><p class="method-desc">Show/hide elements. <code>.hide()</code> remembers the previous display value so <code>.show()</code> restores it correctly. <code>.toggle(bool)</code> forces a state.</p></div>
+    </div>
+  </div>
+
+  <!-- DIMENSIONS -->
+  <div class="section" id="dimensions">
+    <div class="section-header">
+      <h2>Dimensions &amp; Position</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.width([v])</span> / <span class="method-name">.height([v])</span> / <span class="method-name">.innerWidth()</span> / <span class="method-name">.innerHeight()</span> / <span class="method-name">.outerWidth([margin])</span> / <span class="method-name">.outerHeight([margin])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Get/set dimensions. <code>width/height</code> use <code>getBoundingClientRect</code> (includes transforms). <code>innerWidth/Height</code> = clientWidth/Height (includes padding). <code>outerWidth/Height</code> = border-box; pass <code>true</code> to include margin.</p>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.offset()</span> / <span class="method-name">.position()</span></div>
+      <div class="method-body"><p class="method-desc"><code>.offset()</code> returns <code>{ top, left }</code> relative to the document (includes scroll). <code>.position()</code> returns <code>{ top, left }</code> relative to the offset parent.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.scrollTop([v])</span> / <span class="method-name">.scrollLeft([v])</span></div>
+      <div class="method-body"><p class="method-desc">Get or set scroll position. Falls back to <code>window.scrollY/X</code> for document-level queries.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.scrollIntoView([options])</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body"><p class="method-desc">Smoothly scrolls the element into view. Default: <code>{ behavior: 'smooth', block: 'start' }</code>.</p></div>
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="section" id="events">
+    <div class="section-header">
+      <h2>Events</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.on(types [, selector], fn [, options])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Attach one or more event handlers. Multiple event types can be space-separated. Supports <strong>namespacing</strong> (<code>'click.myns'</code>) and <strong>event delegation</strong> via the optional selector argument.</p>
+        <div class="code-block">
+$(<span class="s">'.btn'</span>).<span class="f">on</span>(<span class="s">'click'</span>, handler);
+$(<span class="s">'#list'</span>).<span class="f">on</span>(<span class="s">'click'</span>, <span class="s">'li'</span>, handler); <span class="c">// delegated</span>
+$(<span class="s">'.btn'</span>).<span class="f">on</span>(<span class="s">'mouseenter.ui mouseleave.ui'</span>, handler);
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.off([types [, selector], fn])</span></div>
+      <div class="method-body"><p class="method-desc">Remove event handlers. Supports namespaces and selectors. Call with no args to remove all handlers from all elements.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.one(types [, selector], fn)</span></div>
+      <div class="method-body"><p class="method-desc">Attaches a handler that fires at most once per element, then removes itself.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.trigger(type [, data])</span> / <span class="method-name">.triggerHandler(type [, data])</span></div>
+      <div class="method-body"><p class="method-desc"><code>.trigger()</code> dispatches a bubbling CustomEvent on all elements. <code>.triggerHandler()</code> calls only the first registered handler on the first element without bubbling.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.hover(inFn [, outFn])</span></div>
+      <div class="method-body"><p class="method-desc">Shorthand for mouseenter/mouseleave. If only one function is given, it handles both.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.onThrottle(event, fn, wait)</span> / <span class="method-name">.onDebounce(event, fn, wait)</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body"><p class="method-desc">Attach throttled or debounced event listeners directly on the collection. Default waits: 200ms throttle, 300ms debounce.</p></div>
+    </div>
+
+    <p class="method-desc" style="margin-top:12px;">Shorthand event methods (call with no arg to trigger, with fn to bind):</p>
+    <div class="shorthand-grid">
+      <span class="shorthand-item">.click(fn)</span>
+      <span class="shorthand-item">.dblclick(fn)</span>
+      <span class="shorthand-item">.focus(fn)</span>
+      <span class="shorthand-item">.blur(fn)</span>
+      <span class="shorthand-item">.change(fn)</span>
+      <span class="shorthand-item">.input(fn)</span>
+      <span class="shorthand-item">.submit(fn)</span>
+      <span class="shorthand-item">.keydown(fn)</span>
+      <span class="shorthand-item">.keyup(fn)</span>
+      <span class="shorthand-item">.keypress(fn)</span>
+      <span class="shorthand-item">.mouseenter(fn)</span>
+      <span class="shorthand-item">.mouseleave(fn)</span>
+      <span class="shorthand-item">.mouseover(fn)</span>
+      <span class="shorthand-item">.mouseout(fn)</span>
+      <span class="shorthand-item">.mousemove(fn)</span>
+      <span class="shorthand-item">.mousedown(fn)</span>
+      <span class="shorthand-item">.mouseup(fn)</span>
+      <span class="shorthand-item">.contextmenu(fn)</span>
+      <span class="shorthand-item">.scroll(fn)</span>
+      <span class="shorthand-item">.resize(fn)</span>
+      <span class="shorthand-item">.load(fn)</span>
+      <span class="shorthand-item">.error(fn)</span>
+      <span class="shorthand-item">.select(fn)</span>
+    </div>
+  </div>
+
+  <!-- ANIMATION -->
+  <div class="section" id="animation">
+    <div class="section-header">
+      <h2>Animation</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.animate(props, duration, easing, callback)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Animates CSS properties using CSS transitions. <code>duration</code> in ms or named string (<code>'slow'</code>, <code>'fast'</code>). Returns a chainable collection; use <code>.then(fn)</code> to run code after completion. Also accepts an options object as second argument.</p>
+        <div class="code-block">
+$(<span class="s">'#box'</span>)
+  .<span class="f">animate</span>({ opacity: <span class="v">0</span>, left: <span class="v">200</span> }, <span class="v">600</span>, <span class="s">'ease-in-out'</span>)
+  .<span class="f">then</span>(() => console.<span class="f">log</span>(<span class="s">'done'</span>));
+
+<span class="c">// Options object form</span>
+$(<span class="s">'#box'</span>).<span class="f">animate</span>({ height: <span class="v">0</span> }, {
+  duration: <span class="v">400</span>, easing: <span class="s">'ease'</span>,
+  complete: () => $(<span class="s">'#box'</span>).<span class="f">hide</span>()
+});
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.stop([clearQueue, jumpToEnd])</span></div>
+      <div class="method-body"><p class="method-desc">Immediately stops the current CSS transition on matched elements.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.fadeIn()</span> / <span class="method-name">.fadeOut()</span> / <span class="method-name">.fadeTo(duration, opacity)</span> / <span class="method-name">.fadeToggle()</span></div>
+      <div class="method-body"><p class="method-desc">Opacity transitions. All accept optional <code>(duration, easing, callback)</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.slideDown()</span> / <span class="method-name">.slideUp()</span> / <span class="method-name">.slideToggle()</span></div>
+      <div class="method-body"><p class="method-desc">Height transitions that reveal or hide content vertically. All accept optional <code>(duration, easing, callback)</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.timeline(steps)</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body">
+        <p class="method-desc">Sequences multiple animations with optional delays. Each step: <code>{ target, props, duration, easing, offset }</code> where <code>offset</code> adds extra delay before that step.</p>
+        <div class="code-block">
+$(<span class="s">'body'</span>).<span class="f">timeline</span>([
+  { target: <span class="s">'#a'</span>, props: { opacity: <span class="v">1</span> }, duration: <span class="v">300</span> },
+  { target: <span class="s">'#b'</span>, props: { left: <span class="s">'100px'</span> }, duration: <span class="v">400</span>, offset: <span class="v">100</span> },
+  { target: <span class="s">'#c'</span>, props: { opacity: <span class="v">1</span>, top: <span class="s">'0px'</span> }, duration: <span class="v">500</span> },
+]);
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">$.keyframes(name, frames)</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body">
+        <p class="method-desc">Programmatically injects a <code>@keyframes</code> rule into the first stylesheet. Properties are auto-converted from camelCase.</p>
+        <div class="code-block">
+$.<span class="f">keyframes</span>(<span class="s">'pop'</span>, {
+  <span class="s">'0%'</span>:   { transform: <span class="s">'scale(1)'</span> },
+  <span class="s">'50%'</span>:  { transform: <span class="s">'scale(1.3)'</span> },
+  <span class="s">'100%'</span>: { transform: <span class="s">'scale(1)'</span> },
+});
+$(<span class="s">'.btn'</span>).<span class="f">css</span>(<span class="s">'animation'</span>, <span class="s">'pop 0.4s ease'</span>);
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORMS -->
+  <div class="section" id="forms">
+    <div class="section-header">
+      <h2>Forms</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.serialize()</span></div>
+      <div class="method-body"><p class="method-desc">Encodes a form as a URL-encoded string (<code>name=value&amp;name2=value2</code>). Works on <code>&lt;form&gt;</code> or any element inside one.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.serializeArray()</span></div>
+      <div class="method-body"><p class="method-desc">Returns an array of <code>{ name, value }</code> objects for all form fields.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header">
+        <span class="method-name">.serializeJSON()</span>
+        <div class="method-tags"><span class="method-tag tag-nova">NOVA</span></div>
+      </div>
+      <div class="method-body">
+        <p class="method-desc">Serializes the form directly to a plain JavaScript object. Multiple values for the same name are collected into an array.</p>
+        <div class="code-block">
+<span class="k">const</span> data = $(<span class="s">'#myForm'</span>).<span class="f">serializeJSON</span>();
+<span class="c">// { username: 'alice', tags: ['js', 'css'] }</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.submit([fn])</span> / <span class="method-name">.reset()</span></div>
+      <div class="method-body"><p class="method-desc">Bind or trigger form submit. <code>.reset()</code> resets all fields to their default values.</p></div>
+    </div>
+  </div>
+
+  <!-- AJAX -->
+  <div class="section" id="ajax">
+    <div class="section-header">
+      <h2>AJAX</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+    <div class="alert alert-tip">All AJAX methods use the native <code>fetch</code> API and return native Promises. <code>$.ajax()</code> is jQuery-compatible and accepts the same options object.</div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.ajax(url [, options])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Performs an async HTTP request. The options object accepts: <code>method</code>, <code>data</code>, <code>headers</code>, <code>contentType</code>, <code>dataType</code> (<code>'json'</code>/<code>'html'</code>/<code>'xml'</code>/<code>'text'</code>), <code>timeout</code>, <code>cache</code>, <code>crossDomain</code>, <code>beforeSend</code>, <code>success</code>, <code>error</code>, <code>complete</code>. Returns a Promise with an <code>.abort()</code> method.</p>
+        <div class="code-block">
+$.<span class="f">ajax</span>({
+  url: <span class="s">'/api/users'</span>,
+  method: <span class="s">'POST'</span>,
+  contentType: <span class="s">'application/json'</span>,
+  data: { name: <span class="s">'Alice'</span> },
+  success: res => console.<span class="f">log</span>(res),
+  error: (xhr, status, msg) => console.<span class="f">error</span>(msg),
+});
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.get(url [,data] [,fn])</span> / <span class="method-name">$.post(url [,data] [,fn])</span> / <span class="method-name">$.put()</span> / <span class="method-name">$.patch()</span> / <span class="method-name">$.delete()</span></div>
+      <div class="method-body"><p class="method-desc">Shorthand methods for specific HTTP verbs. All return a Promise.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.getJSON(url [, data] [, fn])</span></div>
+      <div class="method-body"><p class="method-desc">Shorthand for a GET request that parses the response as JSON.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.getScript(url [, fn])</span></div>
+      <div class="method-body"><p class="method-desc">Dynamically loads and executes a JavaScript file.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.load(url [, data] [, fn])</span></div>
+      <div class="method-body"><p class="method-desc">Fetches HTML from <code>url</code> and injects it into matched elements. If <code>data</code> is provided, uses POST. Callback receives <code>(html, status)</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.ajaxSetup(options)</span></div>
+      <div class="method-body"><p class="method-desc">Sets default options for all subsequent <code>$.ajax()</code> calls.</p></div>
+    </div>
+  </div>
+
+  <!-- DEFERRED -->
+  <div class="section" id="deferred">
+    <div class="section-header">
+      <h2>Deferred &amp; Promises</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.Deferred([fn])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Creates a Deferred object — a chainable utility for async operations. Full jQuery 3 API: <code>.done()</code>, <code>.fail()</code>, <code>.always()</code>, <code>.progress()</code>, <code>.then()</code>, <code>.resolve()</code>, <code>.reject()</code>, <code>.notify()</code>, <code>.resolveWith()</code>, <code>.rejectWith()</code>, <code>.state()</code>.</p>
+        <div class="code-block">
+<span class="k">const</span> d = $.<span class="f">Deferred</span>();
+d.<span class="f">done</span>(val => console.<span class="f">log</span>(<span class="s">'resolved:'</span>, val))
+ .<span class="f">fail</span>(err => console.<span class="f">error</span>(err));
+d.<span class="f">resolve</span>(<span class="s">'success'</span>);
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.when(...deferreds)</span></div>
+      <div class="method-body"><p class="method-desc">Returns a new Deferred that resolves when all passed Deferreds resolve, or rejects if any rejects. Analogous to <code>Promise.all</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.Callbacks(flags)</span></div>
+      <div class="method-body">
+        <p class="method-desc">A multi-purpose callback list. Flags: <code>'once'</code> (fire once), <code>'memory'</code> (replay on new add), <code>'unique'</code> (no duplicates), <code>'stopOnFalse'</code>. Methods: <code>.add()</code>, <code>.remove()</code>, <code>.fire()</code>, <code>.fireWith()</code>, <code>.has()</code>, <code>.disable()</code>, <code>.lock()</code>.</p>
+      </div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- REACTIVE -->
+  <div class="section" id="reactive">
+    <div class="section-header">
+      <h2>Reactive Binding</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+    <div class="alert alert-nova">Reactive binding lets you attach observable state directly to DOM elements. When a value changes, a render callback fires automatically — like a micro-Vue, without any framework.</div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.bind(key, renderFn)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Declares a reactive property <code>key</code> on each element. Whenever that property is set, <code>renderFn(value, $el)</code> is called with <code>this</code> bound to the DOM element.</p>
+        <div class="code-block">
+$(<span class="s">'#counter'</span>).<span class="f">bind</span>(<span class="s">'count'</span>, <span class="k">function</span>(val, $el) {
+  $el.<span class="f">text</span>(<span class="s">`Count: ${val}`</span>);
+  $el.<span class="f">toggleClass</span>(<span class="s">'danger'</span>, val > <span class="v">10</span>);
+});
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.setReactive(key, value)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Updates the reactive property, triggering the render callback.</p>
+        <div class="code-block">
+$(<span class="s">'#counter'</span>).<span class="f">setReactive</span>(<span class="s">'count'</span>, <span class="v">5</span>); <span class="c">// triggers renderFn</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.reactive(key)</span></div>
+      <div class="method-body"><p class="method-desc">Reads the current value of a reactive property from the first element.</p></div>
+    </div>
+  </div>
+
+  <!-- OBSERVERS -->
+  <div class="section" id="observers">
+    <div class="section-header">
+      <h2>Observers</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.observe(fn [, options])</span> / <span class="method-name">.inView(fn [, threshold])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Uses <code>IntersectionObserver</code> to call <code>fn(entry, $el)</code> when visibility changes. <code>.inView()</code> is a shorthand with a default threshold of 10%.</p>
+        <div class="code-block">
+$(<span class="s">'.section'</span>).<span class="f">inView</span>(<span class="k">function</span>(entry, $el) {
+  <span class="k">if</span> (entry.isIntersecting) $el.<span class="f">addClass</span>(<span class="s">'visible'</span>);
+}, <span class="v">0.25</span>); <span class="c">// 25% visible before triggering</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.watch(fn [, options])</span> / <span class="method-name">.unwatch()</span></div>
+      <div class="method-body">
+        <p class="method-desc">Attaches a <code>MutationObserver</code> to each element. Calls <code>fn(mutations, $el)</code> when the subtree changes. Default options watch childList, attributes, subtree, and characterData. <code>.unwatch()</code> disconnects.</p>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.onResize(fn)</span></div>
+      <div class="method-body"><p class="method-desc">Attaches a <code>ResizeObserver</code>. <code>fn(entry, $el)</code> is called whenever the element is resized.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.lazyLoad([options])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Lazy-loads images using IntersectionObserver. When the image enters the viewport, the <code>data-src</code> attribute (configurable) is moved to <code>src</code>. Options: <code>{ threshold, src, placeholder }</code>.</p>
+        <div class="code-block">
+$(<span class="s">'img[data-src]'</span>).<span class="f">lazyLoad</span>({
+  placeholder: <span class="s">'/spinner.gif'</span>,
+  threshold: <span class="v">0.2</span>,
+});
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="section" id="timeline">
+    <div class="section-header">
+      <h2>Animation Timeline</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+    <p class="method-desc" style="margin-bottom:16px;">See the <a href="#animation" style="color:var(--accent2);">.timeline()</a> method in the Animation section above.</p>
+  </div>
+
+  <!-- DRAG & DROP -->
+  <div class="section" id="dragdrop">
+    <div class="section-header">
+      <h2>Drag &amp; Drop</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.draggable([options])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Makes elements draggable via mouse events. Options: <code>handle</code> (selector for drag handle), <code>start</code>, <code>drag</code>, <code>stop</code> callbacks.</p>
+        <div class="code-block">
+$(<span class="s">'#panel'</span>).<span class="f">draggable</span>({
+  handle: <span class="s">'.panel-header'</span>,
+  start: e => console.<span class="f">log</span>(<span class="s">'drag started'</span>),
+  stop:  e => console.<span class="f">log</span>(<span class="s">'dropped at'</span>, e.clientX, e.clientY),
+});
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.droppable([options])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Makes elements drop targets. Options callbacks: <code>over</code>, <code>drop</code>, <code>enter</code>, <code>leave</code>.</p>
+        <div class="code-block">
+$(<span class="s">'#dropzone'</span>).<span class="f">droppable</span>({
+  over: () => $(<span class="s">'#dropzone'</span>).<span class="f">addClass</span>(<span class="s">'over'</span>),
+  drop: e => console.<span class="f">log</span>(<span class="s">'dropped!'</span>, e.dataTransfer),
+});
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPLATE -->
+  <div class="section" id="template">
+    <div class="section-header">
+      <h2>Template Engine</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.template(tpl, data)</span></div>
+      <div class="method-body">
+        <p class="method-desc">A lightweight mustache-like template engine. Supports variable interpolation, conditionals, and loops.</p>
+        <table class="params-table">
+          <tr><th>Syntax</th><th>Description</th></tr>
+          <tr><td class="param-name">{{ key }}</td><td class="param-desc">Interpolate value (dot notation supported)</td></tr>
+          <tr><td class="param-name">{% if key %} ... {% endif %}</td><td class="param-desc">Conditional block</td></tr>
+          <tr><td class="param-name">{% each list as item %} ... {% endeach %}</td><td class="param-desc">Loop over array</td></tr>
+        </table>
+        <div class="code-block">
+<span class="k">const</span> html = $.<span class="f">template</span>(<span class="s">`
+  &lt;h1&gt;{{ user.name }}&lt;/h1&gt;
+  {% if user.admin %}
+    &lt;span&gt;Admin&lt;/span&gt;
+  {% endif %}
+  {% each items as item %}
+    &lt;li&gt;{{ item }}&lt;/li&gt;
+  {% endeach %}
+`</span>, { user: { name: <span class="s">'Alice'</span>, admin: <span class="k">true</span> }, items: [<span class="s">'a'</span>, <span class="s">'b'</span>] });
+
+<span class="c">// Or render directly into elements</span>
+$(<span class="s">'#app'</span>).<span class="f">render</span>(tplString, data);
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENT BUS -->
+  <div class="section" id="eventbus">
+    <div class="section-header">
+      <h2>Event Bus</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.bus</span></div>
+      <div class="method-body">
+        <p class="method-desc">A global pub-sub event bus for cross-component communication, independent of the DOM.</p>
+        <div class="code-block">
+$.<span class="f">bus</span>.<span class="f">on</span>(<span class="s">'user:login'</span>, user => console.<span class="f">log</span>(<span class="s">'logged in'</span>, user));
+$.<span class="f">bus</span>.<span class="f">once</span>(<span class="s">'app:ready'</span>, () => $(<span class="s">'#loader'</span>).<span class="f">hide</span>());
+$.<span class="f">bus</span>.<span class="f">emit</span>(<span class="s">'user:login'</span>, { id: <span class="v">1</span>, name: <span class="s">'Alice'</span> });
+$.<span class="f">bus</span>.<span class="f">off</span>(<span class="s">'user:login'</span>, handler); <span class="c">// remove specific handler</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HTTP CLIENT -->
+  <div class="section" id="http">
+    <div class="section-header">
+      <h2>HTTP Client</h2>
+      <span class="section-tag tag-nova">NOVA</span>
+    </div>
+    <div class="alert alert-nova">A mini Axios-style HTTP client with request/response interceptors and automatic retry logic. Separate from <code>$.ajax</code>.</div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.http.get/post/put/patch/delete(url [, data [, opts]])</span></div>
+      <div class="method-body">
+        <p class="method-desc">Makes a fetch request with JSON content type. Returns a native <code>Response</code> Promise.</p>
+        <div class="code-block">
+<span class="k">const</span> res = <span class="k">await</span> $.<span class="f">http</span>.<span class="f">post</span>(<span class="s">'/api/login'</span>, { email, password });
+<span class="k">const</span> data = <span class="k">await</span> res.<span class="f">json</span>();
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.http.fetch(url, opts, retries)</span></div>
+      <div class="method-body"><p class="method-desc">Low-level fetch with retry. Retries with exponential back-off (300ms × attempt).</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.http.interceptors.request.use(fn)</span> / <span class="method-name">$.http.interceptors.response.use(fn)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Register middleware that runs before every request or after every response. Useful for auth headers or global error handling.</p>
+        <div class="code-block">
+$.<span class="f">http</span>.<span class="f">interceptors</span>.<span class="f">request</span>.<span class="f">use</span>(opts => {
+  opts.headers = { ...opts.headers, Authorization: <span class="s">`Bearer ${token}`</span> };
+  <span class="k">return</span> opts;
+});
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORAGE -->
+  <div class="section" id="storage">
+    <div class="section-header">
+      <h2>Storage &amp; Cookies</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.store.set/get/remove/clear</span></div>
+      <div class="method-body">
+        <p class="method-desc">localStorage wrapper with automatic JSON serialization. Pass <code>true</code> as the last argument to use sessionStorage instead.</p>
+        <div class="code-block">
+$.<span class="f">store</span>.<span class="f">set</span>(<span class="s">'prefs'</span>, { theme: <span class="s">'dark'</span> });
+$.<span class="f">store</span>.<span class="f">get</span>(<span class="s">'prefs'</span>); <span class="c">// { theme: 'dark' }</span>
+$.<span class="f">store</span>.<span class="f">remove</span>(<span class="s">'prefs'</span>);
+$.<span class="f">store</span>.<span class="f">set</span>(<span class="s">'session-key'</span>, val, <span class="k">true</span>); <span class="c">// sessionStorage</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.cookie.set/get/remove/all</span></div>
+      <div class="method-body">
+        <p class="method-desc">Cookie helpers. <code>.set(name, value, days, path)</code> creates a cookie with optional expiry. <code>.all()</code> returns all cookies as a plain object.</p>
+        <div class="code-block">
+$.<span class="f">cookie</span>.<span class="f">set</span>(<span class="s">'token'</span>, <span class="s">'abc123'</span>, <span class="v">30</span>); <span class="c">// 30 days</span>
+$.<span class="f">cookie</span>.<span class="f">get</span>(<span class="s">'token'</span>); <span class="c">// 'abc123'</span>
+$.<span class="f">cookie</span>.<span class="f">remove</span>(<span class="s">'token'</span>);
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UTILITIES -->
+  <div class="section" id="utilities">
+    <div class="section-header">
+      <h2>Utilities</h2>
+      <span class="section-tag tag-core">CORE</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.throttle(fn, wait)</span> / <span class="method-name">$.debounce(fn, wait)</span></div>
+      <div class="method-body">
+        <p class="method-desc">Returns a rate-limited version of <code>fn</code>. Throttle ensures <code>fn</code> fires at most once per <code>wait</code> ms. Debounce delays execution until <code>wait</code> ms after the last call.</p>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.copy()</span></div>
+      <div class="method-body"><p class="method-desc">Copies the text content or value of the first element to the clipboard. Returns a Promise. Uses Clipboard API with fallback.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.each(obj, fn)</span> / <span class="method-name">$.map(obj, fn)</span> / <span class="method-name">$.grep(arr, fn [, invert])</span></div>
+      <div class="method-body"><p class="method-desc">Utilities for iterating arrays and objects. <code>$.grep</code> filters an array; pass <code>true</code> as third arg to invert.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.extend([deep,] target [, ...sources])</span></div>
+      <div class="method-body"><p class="method-desc">Merges sources into target. Pass <code>true</code> as first arg for deep merge. With one arg, merges into <code>$.fn</code> (plugin registration).</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.isFunction / $.isArray / $.isString / $.isObject / $.isNumeric / $.isPlainObject / $.isEmptyObject / $.isWindow</span></div>
+      <div class="method-body"><p class="method-desc">Type-checking utilities. All return a boolean.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.type(value)</span></div>
+      <div class="method-body"><p class="method-desc">Returns a lowercase string type: <code>'array'</code>, <code>'object'</code>, <code>'function'</code>, <code>'null'</code>, etc.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.proxy(fn, context [, ...args])</span></div>
+      <div class="method-body"><p class="method-desc">Returns a function that always runs with <code>this === context</code>. Pre-applied args are prepended.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.parseJSON / $.parseXML / $.parseHTML</span></div>
+      <div class="method-body"><p class="method-desc"><code>$.parseJSON</code> is an alias for <code>JSON.parse</code>. <code>$.parseXML</code> uses DOMParser. <code>$.parseHTML</code> returns an array of DOM nodes from an HTML string.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.uuid()</span></div>
+      <div class="method-body"><p class="method-desc">Generates a unique ID string with prefix <code>rb-</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.camelCase(str)</span> / <span class="method-name">$.globalEval(code)</span> / <span class="method-name">$.contains(a, b)</span> / <span class="method-name">$.inArray(val, arr)</span> / <span class="method-name">$.merge(a, b)</span> / <span class="method-name">$.unique(arr)</span></div>
+      <div class="method-body"><p class="method-desc">Miscellaneous utilities mirroring the jQuery static API. <code>$.camelCase</code> converts kebab-case to camelCase. <code>$.globalEval</code> executes a string in global scope.</p></div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- LEGACY EVENTS -->
+  <div class="section" id="jq-events">
+    <div class="section-header">
+      <h2>Legacy Event API</h2>
+      <span class="section-tag tag-jq">JQUERY</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.bind(types, fn)</span> / <span class="method-name">.unbind(types [, fn])</span></div>
+      <div class="method-body"><p class="method-desc">jQuery 1.x event binding. Aliases for <code>.on()</code> / <code>.off()</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.delegate(selector, types, fn)</span> / <span class="method-name">.undelegate(selector, types [, fn])</span></div>
+      <div class="method-body"><p class="method-desc">jQuery 1.7 delegated event binding. Aliases for <code>.on(types, selector, fn)</code> / <code>.off(types, selector, fn)</code>.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.live(types, fn)</span> / <span class="method-name">.die(types [, fn])</span></div>
+      <div class="method-body"><p class="method-desc">Deprecated jQuery 1.x global delegation via <code>document</code>. Included for legacy plugin compatibility.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.event</span></div>
+      <div class="method-body"><p class="method-desc">Internal event hook object. Contains <code>special</code>, <code>fix</code>, <code>add</code>, <code>remove</code>, and <code>trigger</code> — used by jQuery UI and other low-level plugins.</p></div>
+    </div>
+  </div>
+
+  <!-- CALLBACKS & QUEUE -->
+  <div class="section" id="jq-callbacks">
+    <div class="section-header">
+      <h2>Callbacks &amp; Deferred</h2>
+      <span class="section-tag tag-jq">JQUERY</span>
+    </div>
+    <p class="method-desc" style="margin-bottom:16px;">See <a href="#deferred" style="color:var(--accent2);">Deferred &amp; Promises</a> section — <code>$.Callbacks</code> and <code>$.Deferred</code> are fully implemented there with the complete jQuery 3 API.</p>
+  </div>
+
+  <div class="section" id="jq-queue">
+    <div class="section-header">
+      <h2>Queue System</h2>
+      <span class="section-tag tag-jq">JQUERY</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.queue([type] [, data])</span> / <span class="method-name">.dequeue([type])</span> / <span class="method-name">.clearQueue([type])</span></div>
+      <div class="method-body"><p class="method-desc">Manage the function queue for elements. Default queue name is <code>'fx'</code>. Plugins that chain animations using jQuery's queue system will work correctly.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">.promise([type])</span></div>
+      <div class="method-body"><p class="method-desc">Returns a Deferred that resolves when all queued functions have finished running on the collection.</p></div>
+    </div>
+  </div>
+
+  <!-- HOOKS & FX -->
+  <div class="section" id="jq-hooks">
+    <div class="section-header">
+      <h2>Hooks &amp; Animation Settings</h2>
+      <span class="section-tag tag-jq">JQUERY</span>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.cssHooks</span></div>
+      <div class="method-body"><p class="method-desc">An object where plugins can register custom CSS property handlers. Each key is a CSS property name with optional <code>get(el)</code> and <code>set(el, value)</code> hooks.</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.cssNumber</span></div>
+      <div class="method-body"><p class="method-desc">A map of CSS properties that should not have <code>px</code> appended when set with a number (e.g. <code>opacity</code>, <code>zIndex</code>).</p></div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.fx</span></div>
+      <div class="method-body">
+        <p class="method-desc">Animation settings object. <code>$.fx.off = true</code> disables all animations globally (useful for testing). <code>$.fx.speeds</code> maps named durations: <code>'slow'</code> = 600ms, <code>'fast'</code> = 200ms.</p>
+        <div class="code-block">
+$.<span class="f">fx</span>.off = <span class="k">true</span>;  <span class="c">// disable all animations (e.g. in tests)</span>
+$(<span class="s">'#el'</span>).<span class="f">animate</span>({ opacity: <span class="v">0</span> }, <span class="s">'slow'</span>); <span class="c">// uses 600ms</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="method-header"><span class="method-name">$.holdReady(hold)</span> / <span class="method-name">$.readyException(error)</span></div>
+      <div class="method-body"><p class="method-desc">Delay the DOM ready event until external resources are loaded (<code>$.holdReady(true)</code> / <code>$.holdReady(false)</code>). Used by AMD loaders and script managers.</p></div>
+    </div>
+  </div>
+
+  <!-- PLUGINS -->
+  <div class="section" id="plugins">
+    <div class="section-header">
+      <h2>Writing Plugins</h2>
+    </div>
+    <div class="alert alert-tip">RabbitJS is a full drop-in for jQuery. Any existing jQuery plugin will work. Writing new plugins is identical to the jQuery pattern.</div>
+
+    <div class="code-block">
+<span class="c">// Standard jQuery plugin pattern — works unchanged</span>
+(<span class="k">function</span>($) {
+  $.<span class="f">fn</span>.<span class="f">highlight</span> = <span class="k">function</span>(color) {
+    <span class="k">return this</span>.<span class="f">each</span>(<span class="k">function</span>() {
+      $(<span class="k">this</span>).<span class="f">css</span>(<span class="s">'background'</span>, color || <span class="s">'yellow'</span>);
+    });
+  };
+})($);
+
+<span class="c">// Use it</span>
+$(<span class="s">'.important'</span>).<span class="f">highlight</span>(<span class="s">'#ffe44e'</span>);
+
+<span class="c">// Alternative: $.fn.extend</span>
+$.<span class="f">fn</span>.<span class="f">extend</span>({
+  shake() {
+    <span class="k">return this</span>.<span class="f">animate</span>({ left: <span class="v">10</span> }, <span class="v">80</span>)
+               .<span class="f">animate</span>({ left: <span class="v">-10</span> }, <span class="v">80</span>)
+               .<span class="f">animate</span>({ left: <span class="v">0</span> }, <span class="v">80</span>);
+  }
+});
+
+<span class="c">// Or use the RabbitJS static plugin method</span>
+$.<span class="f">plugin</span>(<span class="s">'blink'</span>, <span class="k">function</span>() {
+  <span class="k">return this</span>.<span class="f">fadeOut</span>(<span class="v">500</span>).<span class="f">fadeIn</span>(<span class="v">500</span>);
+});
+    </div>
+
+    <div style="margin-top:20px;">
+      <p class="method-desc"><strong>Plugin compatibility checklist.</strong> RabbitJS provides everything well-behaved jQuery plugins need:</p>
+      <div class="shorthand-grid" style="margin-top:12px;">
+        <span class="shorthand-item">$.fn.jquery ✓</span>
+        <span class="shorthand-item">$.fn.extend ✓</span>
+        <span class="shorthand-item">$.Callbacks ✓</span>
+        <span class="shorthand-item">$.Deferred ✓</span>
+        <span class="shorthand-item">$.cssHooks ✓</span>
+        <span class="shorthand-item">$.event ✓</span>
+        <span class="shorthand-item">$.fx.off ✓</span>
+        <span class="shorthand-item">$.fn.queue ✓</span>
+        <span class="shorthand-item">$.fn.promise ✓</span>
+        <span class="shorthand-item">Symbol.iterator ✓</span>
+        <span class="shorthand-item">instanceof $ ✓</span>
+        <span class="shorthand-item">$.noConflict ✓</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    RabbitJS v1.0.0 — MIT License — jQuery 3.7.1 Compatible
+  </div>
+
+</main>
+
+<script>
+  // ── Scrollspy ──
+  const sections = document.querySelectorAll('.section[id]');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navItems.forEach(n => n.classList.remove('active'));
+        const a = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+        if (a) {
+          a.classList.add('active');
+          a.scrollIntoView({ block: 'nearest' });
+        }
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+
+  // ── Search ──
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    document.querySelectorAll('.method').forEach(m => {
+      const text = m.textContent.toLowerCase();
+      m.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+    document.querySelectorAll('.section').forEach(s => {
+      const methods = s.querySelectorAll('.method');
+      const anyVisible = !q || [...methods].some(m => m.style.display !== 'none');
+      s.style.display = anyVisible ? '' : 'none';
+    });
+  });
+
+  // ── Method expand/collapse ──
+  document.querySelectorAll('.method-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const body = h.nextElementSibling;
+      if (body && body.classList.contains('method-body')) {
+        body.style.display = body.style.display === 'none' ? '' : 'none';
+      }
+    });
+  });
+</script>
+</body>
+</html>
