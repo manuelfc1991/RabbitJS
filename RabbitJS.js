@@ -1310,5 +1310,388 @@
   rb.version = '1.0.0';
   rb.fn.rabbitjs = true;
 
+  // ─── jQuery Compatibility Layer ───────────────────────────────────────────────
+  // Allows jQuery plugins and jQuery-style code to work with RabbitJS.
+  // Exposes `jQuery` and `$` globals, mirrors jQuery's internal API surface
+  // so that plugins using $.fn, $.extend, $.isFunction, etc. work unchanged.
+
+  // ── Core identity properties jQuery plugins commonly sniff ────────────────────
+  rb.fn.jquery = '3.7.1';        // reported version — matches latest jQuery 3.x
+  rb.fn.constructor = rb;        // $.fn.constructor check used by some plugins
+
+  // ── $.extend deep-copy support ────────────────────────────────────────────────
+  // jQuery's $.extend(deep, target, ...sources) supports a boolean first arg
+  rb.extend = function (deep, target, ...sources) {
+    if (typeof deep !== 'boolean') {
+      // called as $.extend(target, ...sources) — shift args
+      sources = [target, ...sources];
+      target  = deep;
+      deep    = false;
+    }
+    if (sources.length === 0) {
+      // $.extend(obj) — merge into rb.fn (plugin registration pattern)
+      Object.assign(rb.fn, target);
+      return rb;
+    }
+    function _merge(dst, src) {
+      Object.keys(src).forEach(k => {
+        if (deep && isObject(src[k]) && !isArray(src[k])) {
+          if (!isObject(dst[k])) dst[k] = {};
+          _merge(dst[k], src[k]);
+        } else {
+          dst[k] = src[k];
+        }
+      });
+      return dst;
+    }
+    return sources.reduce((acc, src) => src ? _merge(acc, src) : acc, target || {});
+  };
+
+  // ── $.fn.extend — the primary plugin registration method ─────────────────────
+  rb.fn.extend = function (obj) {
+    Object.assign(RabbitCollection.prototype, obj);
+    return this;
+  };
+
+  // ── Callbacks (used internally by jQuery Deferred, and by many plugins) ───────
+  rb.Callbacks = function (flags) {
+    flags = flags || '';
+    const once       = flags.includes('once');
+    const memory     = flags.includes('memory');
+    const unique     = flags.includes('unique');
+    const stopOnFalse = flags.includes('stopOnFalse');
+
+    let list = [], fired = false, locked = false, lastMemo;
+
+    const fire = memo => {
+      lastMemo = memory ? memo : undefined;
+      fired = true;
+      list.forEach(fn => {
+        if (stopOnFalse && fn(...memo) === false) return;
+        else fn(...memo);
+      });
+      if (once) list = [];
+    };
+
+    const self = {
+      add (...fns) {
+        fns.forEach(fn => {
+          if (!isFunction(fn)) return;
+          if (unique && list.includes(fn)) return;
+          list.push(fn);
+        });
+        if (memory && fired) fire(lastMemo);
+        return self;
+      },
+      remove (...fns) { list = list.filter(f => !fns.includes(f)); return self; },
+      has (fn) { return fn ? list.includes(fn) : list.length > 0; },
+      empty () { list = []; return self; },
+      disable () { locked = true; list = []; return self; },
+      disabled () { return locked; },
+      lock () { locked = true; if (!memory) self.disable(); return self; },
+      locked () { return locked; },
+      fireWith (ctx, args) { if (!locked) fire(args || []); return self; },
+      fire (...args) { return self.fireWith(this, args); },
+      fired () { return fired; },
+    };
+    return self;
+  };
+
+  // ── Enhanced Deferred (full jQuery 3 API) ─────────────────────────────────────
+  rb.Deferred = function (fn) {
+    const resolvedCbs = rb.Callbacks('once memory');
+    const rejectedCbs = rb.Callbacks('once memory');
+    const notifyCbs   = rb.Callbacks('memory');
+    let state = 'pending';
+
+    const promise = {
+      state:    () => state,
+      always:   fn  => { resolvedCbs.add(fn); rejectedCbs.add(fn); return promise; },
+      then (onRes, onRej, onProg) {
+        if (onRes)  resolvedCbs.add(onRes);
+        if (onRej)  rejectedCbs.add(onRej);
+        if (onProg) notifyCbs.add(onProg);
+        return promise;
+      },
+      done:   fn => { resolvedCbs.add(fn); return promise; },
+      fail:   fn => { rejectedCbs.add(fn); return promise; },
+      progress: fn => { notifyCbs.add(fn); return promise; },
+      promise: () => promise,
+      // Native Promise interop
+      catch: fn => { rejectedCbs.add(fn); return promise; },
+    };
+
+    const deferred = Object.assign({}, promise, {
+      resolve (...args) { state = 'resolved'; resolvedCbs.fire(...args); return deferred; },
+      reject  (...args) { state = 'rejected'; rejectedCbs.fire(...args); return deferred; },
+      notify  (...args) { notifyCbs.fire(...args); return deferred; },
+      resolveWith (ctx, args) { state = 'resolved'; resolvedCbs.fireWith(ctx, args); return deferred; },
+      rejectWith  (ctx, args) { state = 'rejected'; rejectedCbs.fireWith(ctx, args); return deferred; },
+      notifyWith  (ctx, args) { notifyCbs.fireWith(ctx, args); return deferred; },
+    });
+
+    fn?.(deferred);
+    return deferred;
+  };
+
+  rb.when = function (...args) {
+    if (args.length === 0) return rb.Deferred(d => d.resolve()).promise();
+    if (args.length === 1) {
+      const a = args[0];
+      if (a && isFunction(a.promise)) return a.promise();
+      return rb.Deferred(d => d.resolve(a)).promise();
+    }
+    const d = rb.Deferred();
+    let remaining = args.length;
+    const results = [];
+    args.forEach((a, i) => {
+      const p = (a && isFunction(a.promise)) ? a : rb.Deferred(d => d.resolve(a));
+      p.done(v => { results[i] = v; if (--remaining === 0) d.resolve(...results); });
+      p.fail((...e) => d.reject(...e));
+    });
+    return d.promise();
+  };
+
+  // ── Queue / Dequeue (used by jQuery animate and many plugins) ─────────────────
+  rb.fn.queue = function (type, data) {
+    if (typeof type !== 'string') { data = type; type = 'fx'; }
+    if (data === undefined) {
+      const el = this._els[0];
+      if (!el) return [];
+      const d = getData(el);
+      if (!d._queues) d._queues = {};
+      return d._queues[type] || [];
+    }
+    return this.each(el => {
+      const d = getData(el);
+      if (!d._queues) d._queues = {};
+      if (!d._queues[type]) d._queues[type] = [];
+      if (isArray(data)) { d._queues[type] = data; }
+      else {
+        d._queues[type].push(data);
+        if (d._queues[type].length === 1) data.call(el, () => rb(el).dequeue(type));
+      }
+    });
+  };
+
+  rb.fn.dequeue = function (type = 'fx') {
+    return this.each(el => {
+      const d = getData(el);
+      const q = d._queues?.[type] || [];
+      q.shift();
+      if (q.length) q[0].call(el, () => rb(el).dequeue(type));
+    });
+  };
+
+  rb.fn.clearQueue = function (type = 'fx') {
+    return this.each(el => {
+      const d = getData(el);
+      if (d._queues) d._queues[type] = [];
+    });
+  };
+
+  rb.fn.promise = function (type = 'fx', obj) {
+    const d = rb.Deferred();
+    const checkQueue = () => {
+      const remaining = this._els.filter(el => (getData(el)._queues?.[type] || []).length > 0);
+      if (remaining.length === 0) d.resolve(this);
+      else setTimeout(checkQueue, 50);
+    };
+    checkQueue();
+    return d.promise();
+  };
+
+  // ── $.fn.size() — deprecated but used by old plugins ─────────────────────────
+  rb.fn.size = function () { return this.length; };
+
+  // ── $.fn.live / $.fn.die — deprecated jQuery event delegation ─────────────────
+  rb.fn.live = function (events, fn) {
+    rb(document).on(events, this.selector || '*', fn);
+    return this;
+  };
+  rb.fn.die = function (events, fn) {
+    rb(document).off(events, this.selector || '*', fn);
+    return this;
+  };
+
+  // ── $.fn.bind / $.fn.unbind — jQuery 1.x event API ───────────────────────────
+  rb.fn.bind   = function (types, fn) { return this.on(types, fn); };
+  rb.fn.unbind = function (types, fn) { return this.off(types, fn); };
+
+  // ── $.fn.delegate / $.fn.undelegate ───────────────────────────────────────────
+  rb.fn.delegate   = function (sel, types, fn) { return this.on(types, sel, fn); };
+  rb.fn.undelegate = function (sel, types, fn) { return this.off(types, sel, fn); };
+
+  // ── $.fn.die ──────────────────────────────────────────────────────────────────
+  rb.fn.die = function (events, fn) { return this.off(events, fn); };
+
+  // ── $.fn.andSelf (alias for addBack, deprecated in jQuery 1.8) ───────────────
+  rb.fn.andSelf = rb.fn.addBack;
+
+  // ── $.fn.context / $.fn.selector — jQuery internals some plugins read ─────────
+  rb.fn.context  = document;
+  rb.fn.selector = '';
+
+  // ── $.fn.pushStack — used by jQuery traversal methods & plugins ───────────────
+  rb.fn.pushStack = function (els) {
+    const ret = rb(els);
+    ret._prevObject = this;
+    return ret;
+  };
+
+  // Override end() to support pushStack chain unwinding
+  rb.fn.end = function () { return this._prevObject || rb(null); };
+
+  // ── $.sub() — creates a subclass of jQuery (used by some plugin frameworks) ───
+  rb.sub = function () {
+    function SubRb(selector, context) { return new SubRb.fn.init(selector, context); }
+    rb.extend(true, SubRb, rb);
+    SubRb.fn = SubRb.prototype = Object.create(rb.fn);
+    SubRb.fn.constructor = SubRb;
+    SubRb.fn.init = function (sel, ctx) { return rb(sel, ctx); };
+    return SubRb;
+  };
+
+  // ── $.holdReady() — delays ready event (used by some loaders) ────────────────
+  let _holdCount = 0;
+  let _readyFired = false;
+  let _readyList = [];
+  rb.holdReady = function (hold) {
+    if (hold) { _holdCount++; }
+    else {
+      _holdCount--;
+      if (_holdCount <= 0 && _readyFired) {
+        _readyList.forEach(fn => fn(rb));
+        _readyList = [];
+      }
+    }
+  };
+
+  // ── $.readyException ─────────────────────────────────────────────────────────
+  rb.readyException = function (error) { window.setTimeout(() => { throw error; }); };
+
+  // ── $.cssHooks — allows plugins to intercept css get/set ─────────────────────
+  rb.cssHooks = {};
+  rb.cssNumber = {
+    animationIterationCount: true, columnCount: true, fillOpacity: true,
+    flexGrow: true, flexShrink: true, fontWeight: true, gridArea: true,
+    gridColumn: true, gridColumnEnd: true, gridColumnStart: true, gridRow: true,
+    gridRowEnd: true, gridRowStart: true, lineHeight: true, opacity: true,
+    order: true, orphans: true, widows: true, zIndex: true, zoom: true,
+  };
+
+  // Patch css() to respect cssHooks
+  const _origCss = rb.fn.css;
+  rb.fn.css = function (prop, value) {
+    if (isString(prop) && rb.cssHooks[prop]) {
+      const hook = rb.cssHooks[prop];
+      if (value === undefined && hook.get) return hook.get(this._els[0], true);
+      if (value !== undefined && hook.set) { this.each(el => hook.set(el, value)); return this; }
+    }
+    return _origCss.call(this, prop, value);
+  };
+
+  // ── $.event hooks — used by jQuery event plugins ──────────────────────────────
+  rb.event = {
+    special: {},
+    fix: e => e,
+    add (el, types, handler) { rb(el).on(types, handler); },
+    remove (el, types, handler) { rb(el).off(types, handler); },
+    trigger (event, data, el) { rb(el).trigger(event, data); },
+    dispatch: noop,
+    handlers: () => [],
+  };
+
+  // ── $.fn.triggerHandler already exists; alias for completeness ───────────────
+
+  // ── $.contains ───────────────────────────────────────────────────────────────
+  rb.contains = (a, b) => a !== b && a.contains(b);
+
+  // ── $.offset (static) ────────────────────────────────────────────────────────
+  rb.offset = { setOffset: noop };
+
+  // ── $.fx — animation settings jQuery plugins commonly tweak ──────────────────
+  rb.fx = {
+    off: false,
+    interval: 13,
+    speeds: { slow: 600, fast: 200, _default: 400 },
+    step: {},
+    tick: noop,
+    start: noop,
+    stop: noop,
+  };
+
+  // Patch animate() to respect rb.fx.off and named speed strings
+  const _origAnimate = rb.fn.animate;
+  rb.fn.animate = function (props, duration, easing, callback) {
+    if (rb.fx.off) duration = 0;
+    if (isString(duration)) duration = rb.fx.speeds[duration] || rb.fx.speeds._default;
+    return _origAnimate.call(this, props, duration, easing, callback);
+  };
+
+  // ── $.fn.show / hide / toggle — respect rb.fx.off ────────────────────────────
+  const _origFadeIn  = rb.fn.fadeIn;
+  const _origFadeOut = rb.fn.fadeOut;
+  rb.fn.fadeIn  = function (d, e, cb) { if (rb.fx.off) return this.show(); return _origFadeIn.call(this, d, e, cb); };
+  rb.fn.fadeOut = function (d, e, cb) { if (rb.fx.off) return this.hide(); return _origFadeOut.call(this, d, e, cb); };
+
+  // ── $.fn.load (dual-purpose: event + AJAX content loader) ────────────────────
+  const _origLoad = rb.fn.load;
+  rb.fn.load = function (urlOrFn, data, callback) {
+    if (isFunction(urlOrFn)) return this.on('load', urlOrFn);
+    // AJAX content loading: $(el).load(url [, data] [, callback])
+    return this.each(el => {
+      rb.ajax({ url: urlOrFn, method: data && !isFunction(data) ? 'POST' : 'GET',
+        data: !isFunction(data) ? data : undefined, dataType: 'html' })
+        .then(html => {
+          el.innerHTML = html;
+          (isFunction(data) ? data : callback)?.call(el, html, 'success');
+        })
+        .catch(() => (isFunction(data) ? data : callback)?.call(el, '', 'error'));
+    });
+  };
+
+  // ── $.parseHTML now returns RabbitCollection when context element passed ───────
+  // (already exists as array version; keep both)
+
+  // ── $.globalEval — executes script in global scope ───────────────────────────
+  rb.globalEval = function (code) {
+    const script = document.createElement('script');
+    script.text = code;
+    document.head.appendChild(script).parentNode.removeChild(script);
+  };
+
+  // ── $.camelCase ───────────────────────────────────────────────────────────────
+  rb.camelCase = s => s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+
+  // ── $.fn.jquery version string (also on the static object) ───────────────────
+  rb.fn.jquery = '3.7.1';
+
+  // ── noConflict restores both $ and jQuery ─────────────────────────────────────
+  const _prevjQuery = global.jQuery;
+  const _prev$      = global.$;
+  rb.noConflict = function (deep) {
+    if (global.$ === rb) global.$ = _prev$;
+    if (deep && global.jQuery === rb) global.jQuery = _prevjQuery;
+    return rb;
+  };
+
+  // ── Expose as both $ and jQuery globals ───────────────────────────────────────
+  global.jQuery = global.$ = rb;
+
+  // ── Plugin bridge: ensure $.fn plugins auto-work on RabbitCollection ──────────
+  // Any code doing $.fn.myPlugin = function(){} will work because rb.fn === RabbitCollection.prototype
+  // and rb(selector) always returns a RabbitCollection instance.
+
+  // ── Symbol.iterator — makes collections spreadable / for..of compatible ───────
+  RabbitCollection.prototype[Symbol.iterator] = function* () {
+    for (let i = 0; i < this._els.length; i++) yield this._els[i];
+  };
+
+  // ── instanceof check — some plugins do `obj instanceof $` ────────────────────
+  rb[Symbol.hasInstance] = function (instance) {
+    return instance instanceof RabbitCollection;
+  };
+
   return rb;
 });
